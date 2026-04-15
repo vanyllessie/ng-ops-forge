@@ -44,3 +44,7 @@ Thumbs.db
 .claude/settings.local.json
 
 test-output
+
+.angular
+
+__screenshots__/
