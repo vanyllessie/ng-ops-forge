@@ -1,0 +1,7 @@
+/* Compodoc custom theme override */
+:root {
+  --cd-logo-bg: #1d4ed8;
+  --cd-sidebar-bg: #0f172a;
+  --cd-sidebar-color: #e2e8f0;
+  --cd-link-color: #3b82f6;
+}

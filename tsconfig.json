@@ -20,6 +20,12 @@
     },
     {
       "path": "./apps/test-ngrx-fix-e2e"
+    },
+    {
+      "path": "./apps/test-material-e2e"
+    },
+    {
+      "path": "./apps/test-tailwind-e2e"
     }
   ]
 }

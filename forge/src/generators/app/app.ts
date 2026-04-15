@@ -6,7 +6,11 @@ import {
   addDependenciesToPackageJson,
   updateJson,
 } from '@nx/devkit';
-import { applicationGenerator } from '@nx/angular/generators';
+import {
+  applicationGenerator,
+  setupTailwindGenerator,
+  storybookConfigurationGenerator,
+} from '@nx/angular/generators';
 import * as path from 'path';
 import { AppGeneratorSchema } from './schema';
 
@@ -57,7 +61,6 @@ export async function appGenerator(tree: Tree, options: AppGeneratorSchema) {
   const state = options.state ?? 'none';
 
   if (state === 'signals') {
-    // Genera el servicio de estado basado en Signals
     generateFiles(
       tree,
       path.join(__dirname, 'files-state-signals'),
@@ -67,7 +70,6 @@ export async function appGenerator(tree: Tree, options: AppGeneratorSchema) {
   }
 
   if (state === 'ngrx') {
-    // Agrega dependencias de NgRx
     addDependenciesToPackageJson(
       tree,
       {
@@ -81,7 +83,6 @@ export async function appGenerator(tree: Tree, options: AppGeneratorSchema) {
       }
     );
 
-    // Genera los archivos del store NgRx
     generateFiles(
       tree,
       path.join(__dirname, 'files-state-ngrx'),
@@ -89,7 +90,6 @@ export async function appGenerator(tree: Tree, options: AppGeneratorSchema) {
       options
     );
 
-    // Inyectar provideStore() en app.config.ts
     injectNgrxInConfig(tree, projectRoot);
   }
 
@@ -101,11 +101,98 @@ export async function appGenerator(tree: Tree, options: AppGeneratorSchema) {
     options
   );
 
-  // ─── 5. Clean Architecture Folders ───────────────────────────────────────────
+  // ─── 5. UI Framework ─────────────────────────────────────────────────────────
+  const ui = options.ui ?? 'none';
+
+  if (ui === 'tailwind') {
+    // Ejecutar generador oficial de Nx para Tailwind
+    await setupTailwindGenerator(tree, { project: options.name });
+
+    // Sobreescribir con nuestro tailwind.config.js y styles.scss pre-configurados
+    generateFiles(
+      tree,
+      path.join(__dirname, 'files-ui-tailwind'),
+      projectRoot,
+      options
+    );
+  }
+
+  if (ui === 'material') {
+    // Instalar Angular Material
+    addDependenciesToPackageJson(
+      tree,
+      {
+        '@angular/material': '^20.0.0',
+        '@angular/cdk': '^20.0.0',
+      },
+      {}
+    );
+
+    // Inyectar provideAnimationsAsync en app.config.ts
+    injectMaterialInConfig(tree, projectRoot);
+
+    // Inyectar estilos de Angular Material con tema personalizado
+    generateFiles(
+      tree,
+      path.join(__dirname, 'files-ui-material'),
+      projectRoot,
+      options
+    );
+  }
+
+  // ─── 6. Storybook ────────────────────────────────────────────────────────────
+  if (options.storybook) {
+    // Instalar @nx/storybook si no está presente
+    addDependenciesToPackageJson(
+      tree,
+      {},
+      {
+        '@nx/storybook': '^22.6.5',
+        '@storybook/angular': '^8.0.0',
+        '@storybook/addon-essentials': '^8.0.0',
+        '@storybook/addon-a11y': '^8.0.0',
+        '@storybook/addon-interactions': '^8.0.0',
+      }
+    );
+
+    // Configurar Storybook para el proyecto vía generador oficial
+    await storybookConfigurationGenerator(tree, {
+      project: options.name,
+      linter: 'eslint',
+      interactionTests: true,
+      generateStories: false,
+    });
+  }
+
+  // ─── 7. Compodoc ─────────────────────────────────────────────────────────────
+  // Siempre incluimos Compodoc como herramienta de doc técnica
+  addDependenciesToPackageJson(
+    tree,
+    {},
+    {
+      '@compodoc/compodoc': '^1.1.25',
+    }
+  );
+
+  // Agregar script de Compodoc al package.json
+  updateJson(tree, 'package.json', (pkg) => {
+    if (!pkg.scripts) pkg.scripts = {};
+    pkg.scripts['doc:serve'] =
+      `compodoc -p tsconfig.doc.json -s --theme material`;
+    pkg.scripts['doc:build'] =
+      `compodoc -p tsconfig.doc.json --theme material`;
+    return pkg;
+  });
+
+  // Generar tsconfig.doc.json y estilos de compodoc
+  generateFiles(tree, path.join(__dirname, 'root-files-docs'), '.', options);
+
+  // ─── 8. Clean Architecture Folders ───────────────────────────────────────────
   generateFiles(tree, path.join(__dirname, 'files'), projectRoot, options);
 
   await formatFiles(tree);
 }
+
 
 /**
  * Inyecta provideStore() en el app.config.ts generado por Angular
@@ -136,5 +223,30 @@ function injectNgrxInConfig(tree: Tree, projectRoot: string): void {
   tree.write(configPath, content);
 }
 
-export default appGenerator;
+/**
+ * Inyecta provideAnimationsAsync() en app.config.ts para Angular Material
+ */
+function injectMaterialInConfig(tree: Tree, projectRoot: string): void {
+  const configPath = `${projectRoot}/src/app/app.config.ts`;
+  if (!tree.exists(configPath)) return;
 
+  let content = tree.read(configPath, 'utf-8') ?? '';
+
+  if (content.includes('provideAnimationsAsync')) return; // ya inyectado
+
+  // 1. Agregar import
+  content =
+    `import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';\n` +
+    content;
+
+  // 2. Inyectar provider al final del array
+  content = content.replace(
+    /providers:\s*\[([\s\S]*?)\]/,
+    (match, inner) =>
+      `providers: [${inner.trimEnd()},\n    provideAnimationsAsync()\n  ]`
+  );
+
+  tree.write(configPath, content);
+}
+
+export default appGenerator;

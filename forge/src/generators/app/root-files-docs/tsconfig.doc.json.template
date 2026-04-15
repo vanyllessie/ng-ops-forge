@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/@compodoc/compodoc/src/schemas/tsconfig.doc.schema.json",
+  "include": ["src/**/*.ts"],
+  "exclude": [
+    "src/**/*.spec.ts",
+    "src/**/*.e2e-spec.ts",
+    "node_modules"
+  ]
+}
