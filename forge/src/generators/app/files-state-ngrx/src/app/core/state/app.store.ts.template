@@ -1,0 +1,40 @@
+import { createAction, createReducer, on, props } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+
+// --- STATE INTERFACE ---
+export interface AppState {
+  isLoading: boolean;
+  currentUser: string | null;
+}
+
+export const initialState: AppState = {
+  isLoading: false,
+  currentUser: null,
+};
+
+// --- ACTIONS ---
+export const setLoading = createAction(
+  '[App] Set Loading',
+  props<{ isLoading: boolean }>()
+);
+
+export const setCurrentUser = createAction(
+  '[App] Set Current User',
+  props<{ user: string | null }>()
+);
+
+// --- REDUCER ---
+export const appReducer = createReducer(
+  initialState,
+  on(setLoading, (state, { isLoading }) => ({ ...state, isLoading })),
+  on(setCurrentUser, (state, { user }) => ({ ...state, currentUser: user }))
+);
+
+// --- SELECTORS ---
+export const selectAppState = createFeatureSelector<AppState>('app');
+export const selectIsLoading = createSelector(selectAppState, (s) => s.isLoading);
+export const selectCurrentUser = createSelector(selectAppState, (s) => s.currentUser);
+export const selectIsAuthenticated = createSelector(
+  selectCurrentUser,
+  (user) => user !== null
+);

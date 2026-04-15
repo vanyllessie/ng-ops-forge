@@ -1,0 +1,38 @@
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
+
+/**
+ * @description
+ * Root state service powered by Angular Signals.
+ * Acts as a lightweight, reactive state container.
+ * Add feature-specific state slices as needed.
+ *
+ * Usage:
+ *   const state = inject(AppStateService);
+ *   const count = state.count(); // read
+ *   state.increment();           // write
+ */
+@Injectable({ providedIn: 'root' })
+export class AppStateService {
+  // --- STATE SLICES ---
+  readonly isLoading = signal(false);
+  readonly currentUser = signal<string | null>(null);
+
+  // --- DERIVED / COMPUTED ---
+  readonly isAuthenticated = computed(() => this.currentUser() !== null);
+
+  // --- EFFECTS (side-effects tied to state) ---
+  private readonly logEffect = effect(() => {
+    if (this.isLoading()) {
+      console.log('[AppState] Loading...');
+    }
+  });
+
+  // --- ACTIONS ---
+  setLoading(loading: boolean): void {
+    this.isLoading.set(loading);
+  }
+
+  setCurrentUser(user: string | null): void {
+    this.currentUser.set(user);
+  }
+}

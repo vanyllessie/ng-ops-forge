@@ -11,6 +11,15 @@
     },
     {
       "path": "./apps/test-quality-e2e"
+    },
+    {
+      "path": "./apps/test-signals-e2e"
+    },
+    {
+      "path": "./apps/test-ngrx-e2e"
+    },
+    {
+      "path": "./apps/test-ngrx-fix-e2e"
     }
   ]
 }
