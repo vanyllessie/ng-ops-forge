@@ -1,4 +1,4 @@
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, Injectable, signal } from '@angular/core';
 
 /**
  * @description
@@ -20,12 +20,14 @@ export class AppStateService {
   // --- DERIVED / COMPUTED ---
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
 
-  // --- EFFECTS (side-effects tied to state) ---
-  private readonly logEffect = effect(() => {
-    if (this.isLoading()) {
-      console.log('[AppState] Loading...');
-    }
-  });
+  constructor() {
+    // --- EFFECTS (side-effects tied to state) ---
+    effect(() => {
+      if (this.isLoading()) {
+        console.log('[AppState] Loading...');
+      }
+    });
+  }
 
   // --- ACTIONS ---
   setLoading(loading: boolean): void {
