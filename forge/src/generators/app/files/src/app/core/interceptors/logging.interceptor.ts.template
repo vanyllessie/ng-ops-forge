@@ -1,0 +1,40 @@
+import {
+  HttpInterceptorFn,
+  HttpRequest,
+  HttpHandlerFn,
+  HttpEvent,
+  HttpErrorResponse,
+} from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+
+/**
+ * @description
+ * HTTP Logging Interceptor — Core observability layer.
+ * Logs every outgoing request and incoming response/error to the console.
+ * Replace console.log with your APM/monitoring service (e.g. Datadog, Sentry).
+ *
+ * Usage: Add to app.config.ts -> provideHttpClient(withInterceptors([loggingInterceptor]))
+ */
+export const loggingInterceptor: HttpInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<HttpEvent<unknown>> => {
+  const startTime = Date.now();
+  console.log(`[HTTP] ➡️  ${req.method} ${req.url}`);
+
+  return next(req).pipe(
+    tap(() => {
+      const duration = Date.now() - startTime;
+      console.log(`[HTTP] ✅ ${req.method} ${req.url} (${duration}ms)`);
+    }),
+    catchError((error: HttpErrorResponse) => {
+      const duration = Date.now() - startTime;
+      console.error(
+        `[HTTP] ❌ ${req.method} ${req.url} — ${error.status} ${error.statusText} (${duration}ms)`,
+        error.error
+      );
+      return throwError(() => error);
+    })
+  );
+};

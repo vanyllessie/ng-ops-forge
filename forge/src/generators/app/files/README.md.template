@@ -1,0 +1,47 @@
+## NG-Ops Forge — Generated Project
+
+> 🔥 Scaffolded with [NG-Ops Forge](https://github.com/your-org/ng-ops-forge) — Enterprise Angular CLI Generator
+
+### Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Angular 20 (Standalone) |
+| Architecture | Clean Architecture (core / shared / features / data) |
+| State | <%= state === 'signals' ? 'Angular Signals' : state === 'ngrx' ? 'NgRx Store' : 'None' %> |
+| UI | <%= ui === 'material' ? 'Angular Material 3' : ui === 'tailwind' ? 'Tailwind CSS' : 'None' %> |
+| Quality | ESLint · Prettier · Husky · Commitlint |
+| Docs | Compodoc<%= storybook ? ' · Storybook' : '' %> |
+| CI/CD | <%= cicd === 'github-actions' ? 'GitHub Actions' : 'None' %> |
+
+### Commands
+
+```bash
+# Development
+npm start             # Start dev server
+
+# Quality
+npm run lint          # Run ESLint
+npm run test          # Run unit tests
+
+# Documentation
+npm run doc:serve     # Serve Compodoc docs
+npm run doc:build     # Build static docs
+<% if (storybook) { %>
+npm run storybook     # Start Storybook
+<% } %>
+```
+
+### Architecture
+
+```
+src/app/
+├── core/           # Singletons, guards, interceptors (not exported)
+│   ├── interceptors/
+│   │   ├── auth.interceptor.ts
+│   │   └── logging.interceptor.ts
+│   └── state/
+├── shared/         # Dumb components, pipes, directives
+├── features/       # Smart components (business logic by domain)
+└── data/           # Contracts, models, API services
+```

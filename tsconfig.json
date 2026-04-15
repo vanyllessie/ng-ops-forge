@@ -26,6 +26,9 @@
     },
     {
       "path": "./apps/test-tailwind-e2e"
+    },
+    {
+      "path": "./apps/interview-project-e2e"
     }
   ]
 }

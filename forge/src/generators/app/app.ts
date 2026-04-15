@@ -187,8 +187,23 @@ export async function appGenerator(tree: Tree, options: AppGeneratorSchema) {
   // Generar tsconfig.doc.json y estilos de compodoc
   generateFiles(tree, path.join(__dirname, 'root-files-docs'), '.', options);
 
-  // ─── 8. Clean Architecture Folders ───────────────────────────────────────────
+  // ─── 8. CI/CD Workflow ───────────────────────────────────────────────────────
+  if (options.cicd === 'github-actions') {
+    generateFiles(
+      tree,
+      path.join(__dirname, 'root-files-cicd'),
+      '.',
+      options
+    );
+  }
+
+  // ─── 9. Clean Architecture Folders + Interceptors + README ───────────────────
+  // Los interceptores viven en files/src/app/core/interceptors/
+  // El README vive en files/README.md
   generateFiles(tree, path.join(__dirname, 'files'), projectRoot, options);
+
+  // ─── 10. Wire interceptors in app.config.ts ───────────────────────────────────
+  injectInterceptorsInConfig(tree, projectRoot);
 
   await formatFiles(tree);
 }
@@ -244,6 +259,38 @@ function injectMaterialInConfig(tree: Tree, projectRoot: string): void {
     /providers:\s*\[([\s\S]*?)\]/,
     (match, inner) =>
       `providers: [${inner.trimEnd()},\n    provideAnimationsAsync()\n  ]`
+  );
+
+  tree.write(configPath, content);
+}
+
+/**
+ * Inyecta provideHttpClient con los interceptores de observabilidad
+ * en el app.config.ts generado por Angular.
+ */
+function injectInterceptorsInConfig(tree: Tree, projectRoot: string): void {
+  const configPath = `${projectRoot}/src/app/app.config.ts`;
+  if (!tree.exists(configPath)) return;
+
+  let content = tree.read(configPath, 'utf-8') ?? '';
+
+  if (content.includes('withInterceptors')) return; // ya inyectado
+
+  // 1. Agregar imports de HttpClient e interceptores
+  content =
+    `import { provideHttpClient, withInterceptors } from '@angular/common/http';\n` +
+    `import { loggingInterceptor } from './core/interceptors/logging.interceptor';\n` +
+    `import { authInterceptor } from './core/interceptors/auth.interceptor';\n` +
+    content;
+
+  // 2. Inyectar provideHttpClient en el array de providers
+  content = content.replace(
+    /providers:\s*\[([\s\S]*?)\]/,
+    (match, inner) => {
+      // Limpiar comas sobrantes antes de agregar el nuevo provider
+      const cleaned = inner.trimEnd().replace(/,\s*,/g, ',').replace(/,\s*$/, '');
+      return `providers: [${cleaned},\n    provideHttpClient(withInterceptors([loggingInterceptor, authInterceptor]))\n  ]`;
+    }
   );
 
   tree.write(configPath, content);
