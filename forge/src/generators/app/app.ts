@@ -205,7 +205,47 @@ export async function appGenerator(tree: Tree, options: AppGeneratorSchema) {
   // ─── 10. Wire interceptors in app.config.ts ───────────────────────────────────
   injectInterceptorsInConfig(tree, projectRoot);
 
+  // ─── 11. Update Root Workspace Config (Workspaces + Plugins) ──────────────────
+  updateRootConfig(tree);
+
   await formatFiles(tree);
+}
+
+/**
+ * Asegura que el workspace raíz tenga configurado el auto-descubrimiento
+ * de la carpeta 'apps' y el plugin de Angular.
+ */
+function updateRootConfig(tree: Tree): void {
+  // 1. Actualizar package.json workspaces
+  updateJson(tree, 'package.json', (pkg) => {
+    if (!pkg.workspaces) pkg.workspaces = [];
+    if (Array.isArray(pkg.workspaces)) {
+      if (!pkg.workspaces.includes('apps/*')) {
+        pkg.workspaces.push('apps/*');
+      }
+    }
+    return pkg;
+  });
+
+  // 2. Actualizar nx.json plugins
+  updateJson(tree, 'nx.json', (nx) => {
+    if (!nx.plugins) nx.plugins = [];
+    
+    const hasAngularPlugin = nx.plugins.some((p: any) => 
+      (typeof p === 'string' && p === '@nx/angular/plugin') || 
+      (typeof p === 'object' && p.plugin === '@nx/angular/plugin')
+    );
+
+    if (!hasAngularPlugin) {
+      nx.plugins.unshift({
+        plugin: '@nx/angular/plugin',
+        options: {
+          targetName: 'build'
+        }
+      });
+    }
+    return nx;
+  });
 }
 
 
