@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "App",
+  "title": "NG-Ops Forge App Generator",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "El nombre del proyecto",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "¿Cuál es el nombre del nuevo proyecto?"
+    },
+    "style": {
+      "type": "string",
+      "enum": ["css", "scss", "sass", "less"],
+      "default": "scss",
+      "x-prompt": {
+        "message": "¿Qué preprocesador de CSS deseas usar?",
+        "type": "list",
+        "items": [
+          { "value": "scss", "label": "SCSS" },
+          { "value": "css", "label": "CSS" },
+          { "value": "sass", "label": "SASS" },
+          { "value": "less", "label": "LESS" }
+        ]
+      }
+    },
+    "routing": {
+      "type": "boolean",
+      "default": true,
+      "x-prompt": "¿Deseas habilitar el enrutamiento (routing)?"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["signals", "ngrx", "none"],
+      "default": "signals",
+      "x-prompt": {
+        "message": "¿Cuál será la estrategia principal de manejo de estado?",
+        "type": "list",
+        "items": [
+          { "value": "signals", "label": "Angular Signals (Recomendado para apps ligeras)" },
+          { "value": "ngrx", "label": "NgRx (Recomendado para estado global complejo)" },
+          { "value": "none", "label": "Ninguno" }
+        ]
+      }
+    },
+    "ui": {
+      "type": "string",
+      "enum": ["material", "tailwind", "none"],
+      "default": "none",
+      "x-prompt": {
+        "message": "¿Qué framework UI deseas incluir?",
+        "type": "list",
+        "items": [
+          { "value": "material", "label": "Angular Material" },
+          { "value": "tailwind", "label": "Tailwind CSS" },
+          { "value": "none", "label": "Ninguno" }
+        ]
+      }
+    },
+    "quality": {
+      "type": "string",
+      "default": "eslint,prettier,husky,commitlint",
+      "x-prompt": "¿Qué herramientas de calidad deseas configurar (separadas por coma)?"
+    },
+    "cicd": {
+      "type": "string",
+      "enum": ["github-actions", "gitlab-ci", "none"],
+      "default": "github-actions",
+      "x-prompt": {
+        "message": "¿Qué proveedor de CI/CD configurarás?",
+        "type": "list",
+        "items": [
+          { "value": "github-actions", "label": "GitHub Actions" },
+          { "value": "gitlab-ci", "label": "GitLab CI" },
+          { "value": "none", "label": "Ninguno" }
+        ]
+      }
+    },
+    "storybook": {
+      "type": "boolean",
+      "default": true,
+      "x-prompt": "¿Deseas configurar Storybook?"
+    }
+  },
+  "required": ["name"]
+}

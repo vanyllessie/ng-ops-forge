@@ -1,21 +1,43 @@
 {
-  "name": "@ng-ops-forge-tmp/source",
+  "name": "@ng-ops/forge",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {},
   "private": true,
-  "dependencies": {},
   "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "@nx/angular": "^22.6.5",
+    "@nx/eslint": "22.6.5",
+    "@nx/eslint-plugin": "22.6.5",
+    "@nx/jest": "22.6.5",
     "@nx/js": "22.6.5",
+    "@nx/plugin": "^22.6.5",
     "@swc-node/register": "~1.11.1",
+    "@swc/cli": "~0.8.0",
     "@swc/core": "~1.15.5",
     "@swc/helpers": "~0.5.18",
+    "@swc/jest": "~0.2.38",
+    "@types/jest": "^30.0.0",
+    "@types/node": "20.19.9",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^10.0.0",
+    "jest": "^30.0.2",
+    "jest-environment-node": "^30.0.2",
+    "jest-util": "^30.0.2",
+    "jsonc-eslint-parser": "^2.1.0",
     "nx": "22.6.5",
     "prettier": "~3.6.2",
+    "ts-jest": "^29.4.0",
+    "ts-node": "10.9.1",
     "tslib": "^2.3.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.40.0"
   },
   "workspaces": [
-    "packages/*"
-  ]
+    "packages/*",
+    "forge"
+  ],
+  "dependencies": {
+    "@nx/devkit": "22.6.5"
+  }
 }
