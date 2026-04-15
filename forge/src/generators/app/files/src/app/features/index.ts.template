@@ -1,0 +1,2 @@
+// Features Module: Módulos o componentes "smart" (lógica de negocio por dominio)
+export {};

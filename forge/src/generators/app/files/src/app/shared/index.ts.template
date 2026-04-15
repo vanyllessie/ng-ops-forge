@@ -1,0 +1,2 @@
+// Shared Module: Componentes "dumb", pipes y directivas reutilizables
+export {};
