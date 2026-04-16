@@ -1,4 +1,5 @@
 import nx from '@nx/eslint-plugin';
+import prettier from 'eslint-config-prettier';
 
 export default [
   ...nx.configs['flat/base'],
@@ -47,4 +48,5 @@ export default [
       parser: await import('jsonc-eslint-parser'),
     },
   },
+  prettier,
 ];

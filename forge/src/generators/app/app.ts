@@ -246,6 +246,71 @@ function updateRootConfig(tree: Tree): void {
     }
     return nx;
   });
+
+  // 3. Actualizar .vscode/settings.json
+  updateJson(tree, '.vscode/settings.json', (settings) => {
+    return {
+      ...settings,
+      'editor.formatOnSave': true,
+      'editor.defaultFormatter': 'esbenp.prettier-vscode',
+      '[typescript]': {
+        'editor.defaultFormatter': 'esbenp.prettier-vscode',
+      },
+      '[html]': {
+        'editor.defaultFormatter': 'esbenp.prettier-vscode',
+      },
+      'editor.codeActionsOnSave': {
+        'source.fixAll.eslint': 'explicit',
+      },
+      'eslint.validate': ['javascript', 'typescript', 'html'],
+      'eslint.useFlatConfig': true,
+    };
+  });
+
+  // 4. Actualizar .prettierrc
+  updateJson(tree, '.prettierrc', (prettier) => {
+    return {
+      ...prettier,
+      singleQuote: true,
+      semi: true,
+      tabWidth: 2,
+      printWidth: 100,
+      bracketSpacing: true,
+      arrowParens: 'avoid',
+      overrides: [
+        ...(prettier.overrides || []),
+        {
+          files: '*.html',
+          options: {
+            parser: 'angular',
+          },
+        },
+      ],
+    };
+  });
+
+  // 5. Actualizar eslint.config.mjs (Flat Config)
+  updateEslintConfig(tree);
+}
+
+/**
+ * Inyecta eslint-config-prettier en el eslint.config.mjs raíz
+ */
+function updateEslintConfig(tree: Tree): void {
+  const eslintPath = 'eslint.config.mjs';
+  if (!tree.exists(eslintPath)) return;
+
+  let content = tree.read(eslintPath, 'utf-8') ?? '';
+
+  if (content.includes('eslint-config-prettier')) return;
+
+  // 1. Agregar import
+  content = `import prettier from 'eslint-config-prettier';\n` + content;
+
+  // 2. Agregar prettier al final del array export default
+  content = content.replace(/\s*\];\s*$/, ',\n  prettier,\n];');
+
+  tree.write(eslintPath, content);
 }
 
 
